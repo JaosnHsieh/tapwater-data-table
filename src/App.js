@@ -80,7 +80,7 @@ class App extends Component {
       <div className="App">
         <header className="App-header">臺北市自來水管承裝商業者</header>
         <small>
-          tap water icon from
+          tap water icon from{" "}
           <a href="https://www.flaticon.com/free-icon/tap_752006#term=tap&page=1&position=8">
             flaticon
           </a>
