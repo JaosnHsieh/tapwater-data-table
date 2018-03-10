@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import logo from "./logo.svg";
+import tapImg from "./static/tap.png";
 import "./App.css";
 import axios from "axios";
 const corsServer = `http://45.32.119.183:8080/`;
@@ -11,6 +11,11 @@ const tapwaterDataUrl = `http://data.taipei/opendata/datalist/apiAccess?scope=re
 // http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire
 // &rid=35aa3c53-28fb-423c-91b6-2c22432d0d70&limit=3&offset=5
 
+const LoadingImg = () => (
+  <figure className="loading-div">
+    <img className="spin" src={tapImg} />{" "}
+  </figure>
+);
 class App extends Component {
   constructor(props) {
     super(props);
@@ -19,35 +24,50 @@ class App extends Component {
       offset: 0,
       data: [],
       count: 0,
-      isLoading: false
+      isLoading: false,
+      sortKey: "_id",
+      isReverseSort: false
     };
   }
   componentDidMount() {
-    console.log("didmout");
     this.getData();
   }
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   return (
-  //     nextState.limit !== this.state.limit ||
-  //     nextState.offset !== this.state.offset
-  //   );
-  // // }
+
   componentDidUpdate(previousProps, previousState) {
     if (
       previousState.limit !== this.state.limit ||
-      previousState.offset !== this.state.offset
+      previousState.offset !== this.state.offset ||
+      previousState.sortKey !== this.state.sortKey ||
+      previousState.isReverseSort !== this.state.isReverseSort
     ) {
       this.getData();
     }
   }
+  onSort = sortKey => {
+    const isReverseSort =
+      sortKey === this.state.sortKey
+        ? !this.state.isReverseSort
+        : this.state.isReverseSort;
+    this.setState({
+      sortKey,
+      isReverseSort
+    });
+  };
   getData = async (limit = 10, offset = 0) => {
+    this.setState({
+      isLoading: true
+    });
+    const { sortKey, isReverseSort } = this.state;
+    const orderString = isReverseSort ? "desc" : "asc";
     const baseURL = `${corsServer}${tapwaterDataUrl}`;
-    const query = `${baseURL}&limit=${this.state.limit}`;
+    const query = `${baseURL}&limit=${
+      this.state.limit
+    }&offset=${offset}&sort=${sortKey} ${orderString}`;
     let { data: { result } } = await axios.get(query);
-    console.log("result", result);
+
     const { count, results: data } = result;
 
-    this.setState({ data, count });
+    this.setState({ data, count, isLoading: false });
   };
   onLimitChange = async e => {
     this.setState({
@@ -55,12 +75,16 @@ class App extends Component {
     });
   };
   render() {
-    console.log("render");
-
-    const { data } = this.state;
+    const { data, sortKey, isReverseSort, isLoading } = this.state;
     return (
       <div className="App">
         <header className="App-header">臺北市自來水管承裝商業者</header>
+        <small>
+          tap water icon from
+          <a href="https://www.flaticon.com/free-icon/tap_752006#term=tap&page=1&position=8">
+            flaticon
+          </a>
+        </small>
         <nav className="controller">
           <span>資料總筆數:{this.state.count}</span>
           <span>
@@ -72,30 +96,67 @@ class App extends Component {
               <option value="100">100</option>
             </select>
           </span>
-          <span>
-            {" "}
-            {"<<"} 上一頁 下一頁{">>"}
-          </span>
+          <span>{/* {"<<"} 上一頁 下一頁{">>"} */}</span>
         </nav>
+
         <section className="table">
           {data.length > 0 && (
-            <div>
-              <span>ID</span>
-              <span>NAME</span>
-              <span>COMNUM</span>
-              <span>ADDR</span>
-              <span>OWNER</span>
+            <div className="table-header">
+              <span
+                onClick={() => {
+                  this.onSort("_id");
+                }}
+              >
+                {sortKey === "_id" ? (isReverseSort ? " ↓ " : " ↑ ") : ""}
+                ID
+              </span>
+              <span
+                onClick={() => {
+                  this.onSort("NAME");
+                }}
+              >
+                {sortKey === "NAME" ? (isReverseSort ? " ↓ " : " ↑ ") : ""}
+                NAME
+              </span>
+              <span
+                onClick={() => {
+                  this.onSort("COMNUM");
+                }}
+              >
+                {sortKey === "COMNUM" ? (isReverseSort ? " ↓ " : " ↑ ") : ""}
+                COMNUM
+              </span>
+              <span
+                onClick={() => {
+                  this.onSort("ADDR");
+                }}
+              >
+                {sortKey === "ADDR" ? (isReverseSort ? " ↓ " : " ↑ ") : ""}
+                ADDR
+              </span>
+              <span
+                onClick={() => {
+                  this.onSort("OWNER");
+                }}
+              >
+                {sortKey === "OWNER" ? (isReverseSort ? " ↓ " : " ↑ ") : ""}
+                OWNER
+              </span>
             </div>
           )}
-          {data.map(ele => (
-            <div key={ele._id}>
-              <span>{ele._id}</span>
-              <span>{ele.NAME}</span>
-              <span>{ele.COMNUM}</span>
-              <span>{ele.ADDR}</span>
-              <span>{ele.OWNER}</span>
-            </div>
-          ))}
+          {isLoading ? (
+            <LoadingImg />
+          ) : (
+            data.map(ele => (
+              <div key={ele._id}>
+                <span>{ele._id}</span>
+                <span>{ele.NAME}</span>
+                <span>{ele.COMNUM}</span>
+                <span>{ele.ADDR}</span>
+                <span>{ele.OWNER}</span>
+              </div>
+            ))
+          )}
         </section>
       </div>
     );

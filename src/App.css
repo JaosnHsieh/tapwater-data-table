@@ -2,8 +2,8 @@
   text-align: center;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
+.spin {
+  animation: spin infinite 1s linear;
   height: 80px;
 }
 
@@ -22,7 +22,7 @@
   font-size: large;
 }
 
-@keyframes App-logo-spin {
+@keyframes spin {
   from {
     transform: rotate(0deg);
   }
@@ -40,4 +40,10 @@ nav.controller {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   margin: 20px 0;
+}
+section.table > .table-header {
+  margin: 20px 0;
+}
+section.table > .table-header > span {
+  cursor: pointer;
 }
