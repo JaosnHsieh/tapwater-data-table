@@ -13,7 +13,7 @@ const tapwaterDataUrl = `http://data.taipei/opendata/datalist/apiAccess?scope=re
 
 const LoadingImg = () => (
   <figure className="loading-div">
-    <img className="spin" src={tapImg} />{" "}
+    <img alt="loading-icon" className="spin" src={tapImg} />{" "}
   </figure>
 );
 class App extends Component {
